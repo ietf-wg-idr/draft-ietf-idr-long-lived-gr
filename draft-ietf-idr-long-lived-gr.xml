@@ -50,7 +50,7 @@
 <?rfc subcompact="no" ?>
 <!-- keep one blank line between list items -->
 <!-- end of list of popular I-D processing instructions -->
-<rfc category="std" docName="draft-ietf-idr-long-lived-gr-01" ipr="trust200902"
+<rfc category="std" docName="draft-ietf-idr-long-lived-gr-02" ipr="trust200902"
  updates="6368">
   <!-- category values: std, bcp, info, exp, and historic
      ipr values: full3667, noModification3667, noDerivatives3667
@@ -1050,7 +1050,8 @@ in this document as VPN routes can be stalled for a much longer
 period of time (for example 2 hours, 1 day).
       </t>
       <t>
-Therefore, to avoid VPN breach, before enabling BGP LLGR, SPs
+Therefore, to avoid VPN breach, before enabling BGP LLGR on a VPN
+address family, Service Providers
 need to check how fast a given label can be reused by a PE, taking
 into account:
       </t>
@@ -1079,7 +1080,7 @@ requirement to engineer a specific LLGR state between two PE
 devices, whilst engineering label reallocation to occur in a manner
 that results in the two topologies overlapping.  Such allocation is
 particularly difficult to engineer (since it is typically an internal
-mechanism of an LSR).
+mechanism of an router).
       </t>
     </section>
     
