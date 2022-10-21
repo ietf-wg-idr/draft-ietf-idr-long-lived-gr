@@ -15,13 +15,15 @@
 <!ENTITY RFC4761 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.4761.xml">
 <!ENTITY RFC4781 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.4781.xml">
 <!ENTITY RFC5492 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.5492.xml">
-<!ENTITY RFC5575 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.5575.xml">
+<!ENTITY RFC5880 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.5880.xml">
 <!ENTITY RFC6368 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6368.xml">
 <!ENTITY RFC6513 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6513.xml">
 <!ENTITY RFC6514 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6514.xml">
 <!ENTITY RFC6625 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6625.xml">
 <!ENTITY RFC7524 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7524.xml">
+<!ENTITY RFC8174 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.8174.xml">
 <!ENTITY RFC8538 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.8538.xml">
+<!ENTITY RFC8955 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.8955.xml">
 
 <!ENTITY I-D.ietf-idr-bgp-bestpath-selection-criteria SYSTEM "http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-idr-bgp-bestpath-selection-criteria.xml">
 ]>
@@ -124,9 +126,10 @@
 
     <abstract>
       <t>
-In this document we introduce a new BGP capability termed "Long-lived
+In this document, we introduce a new BGP capability termed "Long-lived
 Graceful Restart Capability" so that stale routes can be retained for a
-longer time upon session failure. A well-known BGP community
+longer time upon session failure than is provided for by BGP Graceful
+Restart (RFC 4724). A well-known BGP community
 "LLGR_STALE" is introduced for marking stale routes retained for a
 longer time. A second well-known BGP community, "NO_LLGR", is introduced
 to mark routes for which these procedures should not be applied.
@@ -145,13 +148,13 @@ CE.
   </front>
 
   <middle>
-    <section title="Introduction">
+    <section anchor="intro" title="Introduction">
       <t>
-Historically, routing protocols in general and BGP in particular have been
+Historically, routing protocols in general, and BGP in particular, have been
 designed with a focus on correctness, where a key part of "correctness" is
 for each network element's forwarding state to converge toward the current
 state of the network as quickly as possible. For this reason, the protocol
-was designed to remove state advertised by routers which went down (from a
+was designed to remove state advertised by routers that went down (from a
 BGP perspective) as quickly as possible. Over time, this has been relaxed
 somewhat, notably by BGP Graceful Restart <xref target="RFC4724"></xref>; 
 however, the paradigm
@@ -161,14 +164,14 @@ network.
       <t>
 Over time, two phenomena have arisen that call into question the underlying
 assumptions of this paradigm. The first is the widespread adoption of 
-tunneled forwarding infrastructures, for example MPLS. Such infrastructures
+tunneled forwarding infrastructures, for example, MPLS. Such infrastructures
 eliminate the risk of some types of forwarding loops that can arise in 
-hop-by-hop forwarding, and thus reduce one of the motivations for strong 
+hop-by-hop forwarding and thus reduce one of the motivations for strong 
 consistency between forwarding elements. The second is the increasing use
 of BGP as a transport for data less closely associated with packet forwarding
 than was originally the case. Examples include the use of BGP for 
 autodiscovery (<xref target="RFC4761">VPLS</xref>) and filter programming 
-(<xref target="RFC5575">FLOWSPEC</xref>). In these cases, 
+(<xref target="RFC8955">FLOWSPEC</xref>). In these cases, 
 BGP data takes on a character more akin to configuration than to traditional
 routing.
       </t>
@@ -177,11 +180,11 @@ The observations above motivate a desire to offer network operators the
 ability to choose to retain BGP data for a longer period than has hitherto 
 been possible when the BGP control plane fails for some reason. Although
 the semantics of BGP Graceful Restart <xref target="RFC4724"></xref> are close to those desired,
-several gaps exist, most notably in maximum time for which "stale" information
-can be retained -- Graceful Restart imposes a 4095 second upper bound. 
+several gaps exist, most notably in the maximum time for which "stale" information
+can be retained -- Graceful Restart imposes a 4095-second upper bound. 
       </t>
       <t>
-In this document we introduce a new BGP capability termed "Long-lived Graceful
+In this document, we introduce a new BGP capability termed "Long-lived Graceful
 Restart Capability" so that stale information can be retained for a longer time 
 across a session reset. We also introduce two new BGP well-known communities, "LLGR_STALE",
 to mark such information, and "NO_LLGR", to indicate that these procedures should not
@@ -207,19 +210,30 @@ case, stale routes are retained for only a brief interval. In the GR case, the
 tradeoff between advertising new route status (at the cost of routing churn) 
 and not advertising it (at the cost of suboptimal or incorrect route selection)
 is resolved in favor of not advertising, and in the LLGR case, it is resolved in 
-favor of advertising new state. 
+favor of advertising new state, and using stale information only as a last resort.
       </t>
+      <t>
+<xref target="examples"/> provides some simple examples illustrating the 
+operation of this extension.
+	  </t>
 
       <section title="Requirements Language">
-        <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-        "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
-        document are to be interpreted as described in <xref
-        target="RFC2119">RFC 2119</xref>.</t>
+      <t>
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in
+   <xref target="RFC2119">BCP 14</xref> <xref target="RFC8174"/> when,
+   and only when, they appear in all capitals, as shown here.
+   	  </t>
       </section>
     </section>
 
     <section title="Definitions">
       <t><list hangIndent="2" style="hanging">
+        <t hangText="CE:">
+A Customer Edge router. <xref target="RFC4364"></xref>
+		</t>
+		
         <t hangText="Depreference, Depreferenced:">
 A route is said to be depreferenced if
 it has its route selection preference reduced in reaction to some
@@ -247,15 +261,23 @@ applies the listed procedures. <xref target="RFC4724"></xref> refers to this as 
 	<t hangText="LLGR:">
 Abbreviation for "Long-lived Graceful Restart".
 	</t>
-
+	
 	<t hangText="LLST:">
 Abbreviation for "Long-lived Stale Time".
 	</t>
-
+	
+	<t hangText="PE:">
+A Provider Edge router. <xref target="RFC4364"></xref>
+	</t>
+	
 	<t hangText="Route:">
 We use "route" to mean any information encoded as a BGP NLRI and
 set of path attributes. As discussed above, the connection between such
-routes and installation of forwarding state may be quite remote.
+routes and the installation of forwarding state may be quite remote.
+ 	</t>
+ 	
+ 	<t hangText="VRF:">
+ VPN Routing and Forwarding table. <xref target="RFC4364"></xref>
  	</t>
       </list></t>   
     </section>
@@ -268,7 +290,7 @@ A new BGP capability and two new BGP communities are introduced.
       <section anchor="llgr_cap" title="Long-lived Graceful Restart Capability">
         <t>
 The "Long-lived Graceful Restart Capability", or "LLGR Capability"
-(value: 71) is a new BGP capability <xref target="RFC5492"></xref>
+(value: 71) is a BGP capability <xref target="RFC5492"></xref>
 that can be used by a BGP speaker to indicate its ability to preserve
 its state according to the procedures of this document. This
 capability MUST be advertised in conjunction with the Graceful Restart
@@ -346,7 +368,7 @@ The meaning of the fields are as follows:
       SAFI has indeed been preserved during the previous BGP restart. 
       When set (value 1), the bit indicates that the state has been
       preserved. This bit is called the "F bit" since it was
-      historically used to indicate preservation of Forwarding State. 
+      historically used to indicate the preservation of Forwarding State. 
       Use of the F bit is detailed in the <xref target="session_resets">
       Session Resets section</xref>.
 </t>
@@ -372,8 +394,8 @@ Long-lived Stale Time:
 </section>
 <section title="LLGR_STALE Community">
 <t>
-We introduce a well-known BGP community <xref target="RFC1997"></xref>
-"LLGR_STALE" (value: 0xFFFF0006). It can be used to mark stale routes
+The well-known BGP community <xref target="RFC1997"></xref>
+"LLGR_STALE" (value: 0xFFFF0006) can be used to mark stale routes
 retained for a longer period of time. Such long-lived stale routes are to
 be handled according to the procedures specified in the <xref
 target="operation">Operation section</xref>.
@@ -385,8 +407,8 @@ reject, or modify routes based on the presence or absence of this community.
       </section>
       <section title="NO_LLGR Community">
 <t>
-We introduce a well-known BGP community "NO_LLGR" (value: 0xFFFF0007). It can be
-used to mark routes which a BGP speaker does not want treated according to 
+The well-known BGP community "NO_LLGR" (value: 0xFFFF0007) can be
+used to mark routes that a BGP speaker does not want to be treated according to 
 these procedures, as detailed in <xref target="operation">the Operation 
 section</xref>.
 </t>
@@ -418,8 +440,8 @@ unless explicitly revised by this document.
 The Graceful Restart capability MUST be advertised in conjunction 
 with the LLGR capability. If it is not so advertised, the LLGR 
 capability MUST be disregarded. The purpose for mandating that both
-be used in conjunction is to enable reuse of certain base mechanisms
-that are common to both "flavors", notably origination, collection
+be used in conjunction is to enable the reuse of certain base mechanisms
+that are common to both "flavors", notably origination, collection,
 and processing of EoR, as well as the finite state machine modifications
 and connection reset logic introduced by GR.
       </t>
@@ -491,11 +513,12 @@ procedures MUST be performed:
       	</t>
       	<t><list style="symbols">
       	<t>
-     The helper router MUST start a timer for the "Long-lived 
-     Stale Time". If the timer for the "Long-lived Stale Time" 
-     expires before the session is re-established, the helper
-     MUST delete all the stale routes from the neighbor that it 
-     is retaining.
+     For each AFI/SAFI for which it has advertised a nonzero "Long-lived
+     Stale Time", the helper router MUST start a timer for that
+     "Long-lived Stale Time". If the timer for the "Long-lived Stale
+     Time" for a given AFI/SAFI expires before the session is
+     re-established, the helper MUST delete all stale routes of that
+     AFI/SAFI from the neighbor that it is retaining. 
       	</t>
       	<t>
      The helper router MUST attach the LLGR_STALE community
@@ -519,8 +542,7 @@ procedures MUST be performed:
 Once the session is re-established, the procedures specified in <xref target="RFC4724"></xref>
 apply for the stale routes irrespective of whether the stale routes are
 retained during the "Restart Time" period or the "Long-lived Stale Time" period.
-However, in the case of consecutive restarts (i.e, the session goes down before
-the EoR is received) the previously marked stale routes MUST NOT
+However, in the case of consecutive restarts, the previously marked stale routes MUST NOT
 be deleted before the timer for the "Long-lived Stale Time" expires. 
       	</t>
       	<t>
@@ -533,25 +555,29 @@ immediately remove all the stale routes from the peer that it is retaining
 for that address family.
       	</t>
       	<t>
-If a "Long-lived Stale Time" timer is running for a peer, it MUST
-NOT be updated (other than by manual operator intervention) until
-the peer has established and synchronized a new session. The
-session is termed "synchronized" once the EoR has been received
-from the peer. 
+If a "Long-lived Stale Time" timer is running for routes with a given
+AFI/SAFI received from a peer, it MUST NOT be updated (other than by
+manual operator intervention) until the peer has established and
+synchronized a new session. The session is termed "synchronized" for a
+given AFI/SAFI once the EoR for that AFI/SAFI has been received from the
+peer, or once the Selection_Deferral_Timer discussed in <xref
+target="RFC4724"></xref> expires. 
       	</t>
       	<t>
-The value of the "Long-lived Stale Time" in the capability received
+The value of a "Long-lived Stale Time" in the capability received
 from a neighbor MAY be reduced by local configuration.
       	</t>
       	<t>
-While the session is down, the expiration of the "Long-lived Stale Time"
-timer is treated analogously to the expiration of the "Restart Time" timer
-in Graceful Restart. However, the timer continues to run once the session
-has re-established. The timer is not stopped, nor updated, until EoR is
-received from the peer. If the timer expires during synchronization with
-the peer, any stale routes that the peer has not refreshed, are removed.
-If the session subsequently resets prior to becoming synchronized, any
-remaining routes should be removed immediately. 
+While the session is down, the expiration of a "Long-lived Stale Time"
+timer is treated analogously to the expiration of the "Restart Time"
+timer in Graceful Restart, other than applying only to the AFI/SAFI it
+accompanies. However, the timer continues to run once the session has
+re-established. The timer is neither stopped nor updated until EoR is
+received for the relevant AFI/SAFI from the peer. If the timer expires
+during synchronization with the peer, any stale routes that the peer has
+not refreshed, are removed. If the session subsequently resets prior to
+becoming synchronized, any remaining routes (for the AFI/SAFI whose LLST
+timer expired) MUST be removed immediately. 
       	</t>
       </section>
       
@@ -596,7 +622,8 @@ were least-preferred -- in all other cases, such routes would have been
 eliminated from consideration.
 	</t>
       </section>
-      
+
+<!--      
       <section title="Multicast VPN">
         <t>
   If LLGR is being used in a network that carries Multicast VPN (MVPN)
@@ -731,6 +758,7 @@ eliminated from consideration.
   will be properly distributed.
     </t>
       </section>
+-->
 
       <section title="Errors">
         <t>
@@ -765,10 +793,10 @@ conditions:
 	</list></t>
 	<t>
 If this strategy for partial deployment is used, the network operator should
-set LOCAL_PREF to zero for all LLGR routes throughout the Autonomous System.
+set LOCAL_PREF to zero for all long-lived stale routes throughout the Autonomous System.
 This trades off a small reduction in flexibility (ordering may not be
-preserved between competing LLGR routes) for consistency between routers
-which do, and do not, support this specification. Since consistency of route
+preserved between competing long-lived stale routes) for consistency between routers
+that do, and do not, support this specification. Since the consistency of route
 selection can be important for preventing forwarding loops, the latter
 consideration dominates.
         </t>
@@ -783,7 +811,7 @@ deployments to accommodate interoperation with peer routers that cannot easily b
 upgraded to support specifications such as this one. This leads to a
 problem: in this specification, we take pains to ensure that "stale"
 routing information will not leak beyond the perimeter of routers that
-support these procedures, so that it can be depreferenced as expected, and
+support these procedures so that it can be depreferenced as expected, and
 we provide <xref target="partial_deploy">a workaround</xref> for the case
 where one or more IBGP routers are not upgraded. However, in the VPN PE-CE
 case, the protocol in use is EBGP, and our workaround does not work since
@@ -870,12 +898,13 @@ The deployment considerations discussed in <xref target="RFC4724"></xref> apply 
 document. In addition, network operators are cautioned to carefully
 consider the potential disadvantages of deploying these procedures for a
 given AFI/SAFI. Most notably, if used for an AFI/SAFI that conveys
-traditional reachability information, use of a long-lived stale route could
+traditional reachability information, the use of a long-lived stale route could
 result in a loss of connectivity for the covered prefix. This specification
 takes pains to mitigate this risk where possible, by making such routes
 least-preferred and by restricting the scope of such routes to routers that
 support these procedures (or, optionally, a single Autonomous System, see
-"Optional Partial Deployment Procedure", above). However, according to the
+<xref target="partial_deploy">"Optional Partial Deployment Procedure"</xref>). 
+However, according to the
 normal rules of IP forwarding a stale more-specific route, that has no
 non-stale alternate paths available, will still be used instead of a
 non-stale less-specific route. Networks in which the deployment of these procedures
@@ -888,14 +917,14 @@ require affirmative configuration per AFI/SAFI in order to enable them.
       </t>
       <t>
 The procedures of this document do not alter the route resolvability
-requirement of <xref target="RFC4271"></xref> Section 9.1.2.1.. Because of this, it will commonly be
+requirement of Section 9.1.2.1 of <xref target="RFC4271"></xref>. Because of this, it will commonly be
 the case that "stale" IBGP routes will only continue to be used if the
 router depicted in the next hop remains resolvable, even if its BGP
 component is down. Details of IGP
 fault-tolerance strategies are beyond the scope of this document. In
 addition to the foregoing, it may be advisable to check the viability of
-the next hop through other means, see for example
-<xref target="I-D.ietf-idr-bgp-bestpath-selection-criteria"></xref>. This may be especially
+the next hop through other means, for example, 
+<xref target="RFC5880">BFD</xref>. This may be especially
 useful in cases where the next hop is known directly at the network layer,
 notably EBGP. 
       </t>
@@ -908,7 +937,7 @@ prevented but with potential blackholing of traffic. During the second
 period potential blackholing of traffic may be reduced but routing churn
 would be visible throughout the network. The setting of the relevant
 parameters for a particular application should take into account the
-tradeoffs, the network dynamics and potential failure scenarios. If needed,
+tradeoffs, the network dynamics, and potential failure scenarios. If needed,
 the first period can be bypassed either by local configuration or by setting
 the "Restart Time" in the Graceful Restart Capability to zero and/or not
 listing the AFI/SAFI in that Capability.
@@ -917,8 +946,8 @@ listing the AFI/SAFI in that Capability.
 The setting of the F bit (and the "Forwarding State" bit of the
 accompanying GR capability) depends in part on deployment considerations.
 The F bit can be understood as an indication that the Helper should flush
-associated routes (if the bit is left clear). As discussed in the
-Introduction, an important use case for LLGR is for routes that are more
+associated routes (if the bit is left clear). As discussed in <xref target="intro">
+the Introduction</xref>, an important use case for LLGR is for routes that are more
 akin to configuration than to traditional routing. For such routes, it may
 make sense to always set the F bit, regardless of other considerations.
 Likewise, for control-plane-only entities such as dedicated route
@@ -945,7 +974,7 @@ this specification. In that case, the operator configuring their PE
 (CE) to advertise such routes should notify the operator of the CE
 (PE) receiving the routes, and the CE (PE) should be configured to
 depreference the routes. Typical BGP implementations will be able to
-do this by matching on the LLGR_STALE community, and setting the
+do this by matching on the LLGR_STALE community and setting the
 LOCAL_PREF for matching routes to zero, similar to the procedure
 described in <xref target="partial_deploy"/>.
         </t>
@@ -986,7 +1015,8 @@ simple topology:
   	]]></artwork></figure>
 	<t>
 In this example, A - D are routers with a full mesh of IBGP sessions
-between them. The short links have unit cost, the long link has cost 5.
+between them (the sessions are not shown). 
+The short links have unit cost, the long link has cost 5.
 Routers A and D are AS border routers, each advertising some route, R, into
 the AS -- these are denoted R1 and R2 in the diagram. In ordinary
 operation, it can be seen that routers B and C will select R1 for
@@ -1018,11 +1048,11 @@ of enabling LLGR.
     
     <section title="Security Considerations">
       <t>
-The security implications of the LLGR mechanism defined within
+The security implications of the LLGR mechanism defined 
 in this document are akin to those incurred by the maintenance of
 stale routing information within a network.  This is particularly
 relevant when considering the maintenance of routing information that
-is utilised for service segregation - such as MPLS label entries.
+is used for service segregation - such as MPLS label entries.
       </t>
       <t>
 For MPLS VPN services, the effectiveness of the traffic isolation
@@ -1033,12 +1063,12 @@ to a VPN route of a different VPN until all ingress PEs stop using
 the old VPN1 route using L1.
       </t>
       <t>
-Such a corner case may happen today, if the propagation of VPN routes
-by BGP messages between PEs takes more time than the label re-
-allocation delay on a PE.  Given that we can generally bound worst
-case BGP propagation time to a few minutes (for example 2-5), the security
+Such a corner case may happen today if the propagation of VPN routes
+by BGP messages between PEs takes more time than the label re-allocation 
+delay on a PE.  Given that we can generally bound the worst-case 
+BGP propagation time to a few minutes (for example 2-5), the security
 breach will not occur if PEs are designed to not reallocate a
-previous used and withdrawn label before a few minutes.
+previously used and withdrawn label before a few minutes.
       </t>
       <t>
 The problem is made worse with BGP GR between PEs as VPN routes can
@@ -1050,22 +1080,22 @@ in this document as VPN routes can be stalled for a much longer
 period of time (for example 2 hours, 1 day).
       </t>
       <t>
-Therefore, to avoid VPN breach, before enabling BGP LLGR on a VPN
+Therefore, to avoid VPN breach, before enabling BGP LLGR for a VPN
 address family, Service Providers
 need to check how fast a given label can be reused by a PE, taking
 into account:
       </t>
       <t><list style="symbols">
       <t>
-      The load of the BGP route churn on a PE (in term of number 
-      of VPN label advertised and churn rate).
+      The load of the BGP route churn on a PE (in terms of the number 
+      of VPN labels advertised and the churn rate).
       </t>
       <t>
       The label allocation policy on the PE (possibly depending 
-      upon the size of pool of the VPN labels (which can be
-      restricted by hardware consideration or others MPLS usages),
+      upon the size of the pool of the VPN labels (which can be
+      restricted by hardware considerations or other MPLS usages),
       the label allocation scheme (for example per route or per VRF/CE),
-      the re- allocation policy (for example least recently used label...)
+      the re-allocation policy (for example least recently used label).
       </t>
       </list></t>
       <t>
@@ -1073,18 +1103,18 @@ Note that <xref target="RFC4781"></xref> which defines Graceful Restart Mechanis
 for BGP with MPLS is also applicable to BGP LLGR.
       </t>
       <t>
-In addition to these considerations, the LLGR mechanism
+These considerations notwithstanding, the LLGR mechanism
 described within this document is considered to be complex to exploit
 maliciously - in order to inject packets into a topology, there is a
 requirement to engineer a specific LLGR state between two PE
 devices, whilst engineering label reallocation to occur in a manner
 that results in the two topologies overlapping.  Such allocation is
 particularly difficult to engineer (since it is typically an internal
-mechanism of an router).
+mechanism of a router).
       </t>
     </section>
     
-    <section title="Examples of Operation">
+    <section anchor="examples" title="Examples of Operation">
       <t>
 For illustrative purposes, we present a few examples of how this
 specification might be used in practice. These examples are neither
@@ -1095,8 +1125,8 @@ Consider the following scenario: A border router, ASBR1, has an IBGP peering wit
 a route reflector, RR1, from which it learns routes. It has an EBGP peering
 with an external peer, EXT, to which it advertises those routes. The external peer
 has advertised the GR and LLGR Capabilities to ASBR1. ASBR1 is configured
-to support GR and LLGR on its session with RR1 and EXT. RR1 advertises a GR Restart Time
-of 1 (second) and a LLST of 3600 (seconds): 
+to support GR and LLGR on its sessions with RR1 and EXT. RR1 advertises a GR Restart Time
+of 1 (second) and an LLST of 3600 (seconds): 
       </t>
       <?rfc compact="no" ?>
       <texttable>
@@ -1193,7 +1223,7 @@ advertised the LLGR Capability to ASBR1:
       <t>
 We would like to thank Nabil Bitar, Martin Djernaes, Roberto Fragassi,
 Jeffrey Haas, Nicolai Leymann, Paul Mattes, John Medamana, Pranav
-Mehta, Han Nguyen, Saikat Ray and Eric Rosen for their valuable input
+Mehta, Han Nguyen, and Saikat Ray for their valuable input
 and contributions to the discussion and solution.
       </t>
     </section>
@@ -1210,54 +1240,79 @@ and contributions to the discussion and solution.
 
         <figure align="left"><artwork align="left"><![CDATA[
  Pradosh Mohapatra
- Cumulus Networks
+ Sproute Networks
 
- Email: pmohapat@cumulusnetworks.com   
+ Email: mpradosh@yahoo.com
 	]]></artwork></figure>
 
         <figure align="left"><artwork align="left"><![CDATA[
  Yakov Rekhter
- Juniper Networks
-
- Email: yakov@juniper.net
 	]]></artwork></figure>
-
+ <!-- Note: Yakov has requested that his email address not be 
+ published. I (John Scudder) can contact him if needed. -->
+ 
         <figure align="left"><artwork align="left"><![CDATA[
  Eric Rosen
- Cisco Systems
 
- Email: erosen@cisco.com
+ Email: erosen52@gmail.com
 	]]></artwork></figure>
 
         <figure align="left"><artwork align="left"><![CDATA[
- Rob Shakir
- BT
+  Rob Shakir
+  Google, Inc.
+  1600 Amphitheatre Parkway
+  Mountain View, CA 94043
+  United States of America
 
- Email: rob.shakir@bt.com
+  Email: robjs@google.com
 	]]></artwork></figure>
 
         <figure align="left"><artwork align="left"><![CDATA[
- Adam Simpson
- Alcatel-Lucent
- 600 March Road
- Ottawa, Ontario  K2K 2E6
- Canada
+  Adam Simpson
+  Nokia
 
- Email: adam.simpson@alcatel-lucent.com
+  Email: adam.1.simpson@nokia.com
 	]]></artwork></figure>
     </section>
 
     <section anchor="IANA" title="IANA Considerations">
       <t>
 This document defines a new BGP capability - Long-lived Graceful Restart
-Capability. IANA has assigned a Capability Code of 71.
+Capability. IANA has assigned a Capability Code of 71, from the "Capability Codes"
+registry. 
       </t>
       <t>
-This document introduces a new BGP community "LLGR_STALE" for marking
-the long-lived stale routes, and another community "NO_LLGR" to 
-indicate that stale routes should not be retained. IANA has assigned these
-well-known community values 0xFFFF0006 and 0xFFFF0007, respectively.
+This document introduces a new BGP well-known community "LLGR_STALE" for marking
+long-lived stale routes, and another well-known community "NO_LLGR" to 
+mark routes that should not be retained if stale. IANA has assigned these
+well-known community values 0xFFFF0006 and 0xFFFF0007, respectively, from the
+"BGP Well-known Communities" registry.
       </t>
+      <t>
+For each of these three registrations, IANA is requested to update the 
+reference to refer to this document.
+	  </t>
+	  <t>
+IANA is requested to establish a new registry called "Long-lived Graceful
+Restart Flags for Address Family" under the 
+Border Gateway Protocol (BGP) Parameters group. The registration 
+procedures are Standards Action. The registry should initially be 
+populated as follows:
+	  </t>
+	  <texttable>
+	    <ttcol>Bit Position</ttcol>
+	    <ttcol>Name</ttcol>
+	    <ttcol>Short Name</ttcol>
+	    <ttcol>Reference</ttcol>
+	    <c>0</c>
+	    <c>Preservation of state</c>
+	    <c>F</c>
+	    <c>This document</c>
+	    <c>1-7</c>
+	    <c>Unassigned</c>
+	    <c></c>
+	    <c></c>
+	  </texttable>
     </section>
   </middle>
 
@@ -1269,20 +1324,21 @@ well-known community values 0xFFFF0006 and 0xFFFF0007, respectively.
       &RFC4724;
       &RFC4760;
       &RFC5492;
-      &RFC6513;
+<!--      &RFC6513;
       &RFC6514;
-      &RFC6625;
+      &RFC6625; -->
+      &RFC8174;
 	  &RFC8538;
     </references>
 
     <references title="Informative References">
       &RFC4761;
       &RFC4781;
-      &RFC5575;
       &RFC4364;
+      &RFC5880;
       &RFC6368;
-      &RFC7524;
-      &I-D.ietf-idr-bgp-bestpath-selection-criteria;
+<!--      &RFC7524; -->
+      &RFC8955;
     </references>
   </back>
 </rfc>
