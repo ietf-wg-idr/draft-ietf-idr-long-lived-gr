@@ -52,7 +52,7 @@
 <?rfc subcompact="no" ?>
 <!-- keep one blank line between list items -->
 <!-- end of list of popular I-D processing instructions -->
-<rfc category="std" docName="draft-ietf-idr-long-lived-gr-02" ipr="trust200902"
+<rfc category="std" docName="draft-ietf-idr-long-lived-gr-03" ipr="trust200902"
  updates="6368">
   <!-- category values: std, bcp, info, exp, and historic
      ipr values: full3667, noModification3667, noDerivatives3667
@@ -156,7 +156,7 @@ for each network element's forwarding state to converge toward the current
 state of the network as quickly as possible. For this reason, the protocol
 was designed to remove state advertised by routers that went down (from a
 BGP perspective) as quickly as possible. Over time, this has been relaxed
-somewhat, notably by BGP Graceful Restart <xref target="RFC4724"></xref>; 
+somewhat, notably by BGP Graceful Restart (GR) <xref target="RFC4724"></xref>; 
 however, the paradigm
 has remained one of attempting to rapidly remove "stale" state from the 
 network.
@@ -168,7 +168,7 @@ tunneled forwarding infrastructures, for example, MPLS. Such infrastructures
 eliminate the risk of some types of forwarding loops that can arise in 
 hop-by-hop forwarding and thus reduce one of the motivations for strong 
 consistency between forwarding elements. The second is the increasing use
-of BGP as a transport for data less closely associated with packet forwarding
+of BGP as a transport for data which is less closely associated with packet forwarding
 than was originally the case. Examples include the use of BGP for 
 autodiscovery (<xref target="RFC4761">VPLS</xref>) and filter programming 
 (<xref target="RFC8955">FLOWSPEC</xref>). In these cases, 
@@ -206,10 +206,10 @@ whereas in the traditional version, route preference is not affected.
 The design choice to treat Long-Lived Stale routes as least-preferred was informed by
 the expectation that they might be retained for a (potentially) almost
 unbounded period of time, whereas in the traditional Graceful Restart
-case, stale routes are retained for only a brief interval. In the GR case, the 
+case, stale routes are retained for only a brief interval. In the Graceful Restart case, the 
 tradeoff between advertising new route status (at the cost of routing churn) 
 and not advertising it (at the cost of suboptimal or incorrect route selection)
-is resolved in favor of not advertising, and in the LLGR case, it is resolved in 
+is resolved in favor of not advertising. In the LLGR case, it is resolved in 
 favor of advertising new state, and using stale information only as a last resort.
       </t>
       <t>
@@ -387,7 +387,9 @@ Long-lived Stale Time:
       This time (in seconds) specifies how long stale information
       (for the AFI/SAFI) may be retained (in conjunction
       with the period specified by the "Restart Time" in the
-      Graceful Restart Capability). 
+      Graceful Restart Capability). Because the potential use cases for
+      this extension vary widely, there is no suggested default
+      value for the LLST.
 </t></list></t>
 <?rfc subcompact="no" ?>
 </list></t>
@@ -484,7 +486,7 @@ specification</xref> no longer applies:
 and the following procedures are specified instead:
       	</t>
       	<t>
-After the session goes down and before the session is re-established,
+After the session goes down, and before the session is re-established,
 the stale routes for an AFI/SAFI MUST be retained. The interval for
 which they are retained is
 limited by the sum of the "Restart Time" in the received Graceful Restart Capability
@@ -493,7 +495,7 @@ Restart Capability. These timers MAY be modified by local configuration.
       	</t>
       	<t>
 If the value of the "Restart Time" or the "Long-lived Stale Time" is zero,
-the duration of the corresponding period would be zero seconds. So, for
+the duration of the corresponding period would be zero seconds. For
 example, if the "Restart Time" is zero and the "Long-lived Stale Time" is
 nonzero, only the procedures particular to LLGR would apply. Conversely, if
 the "Long-lived Stale Time" is zero and the "Restart Time" is nonzero, only
@@ -502,8 +504,8 @@ would apply, only those of the base BGP specification (although EoR would
 still be used as detailed in <xref target="RFC4724"></xref>). And finally, if both
 are nonzero, then the procedures would be applied serially -- first those of 
 GR, then those of LLGR. We observe that during the first interval, while the 
-procedures of GR are in effect, route preference would not be affected, while
-during the second interval, while LLGR procedures are in effect, routes
+procedures of GR are in effect, route preference would not be affected. 
+During the second interval, while LLGR procedures are in effect, routes
 would be treated as least-preferred as specified elsewhere in this document.
       	</t>
       	<t>
@@ -613,9 +615,8 @@ or upon attaching the "LLGR_STALE" community itself per
      
       <section title="Route Selection">
 	<t>
-In this document, when we refer to treating a route as least-preferred, this
-means the route MUST be treated as less preferred than any other route that
-is not so treated. When performing route selection between two routes both
+A "least-preferred" route MUST be treated as less preferred than any other route that
+is not also least-preferred. When performing route selection between two routes both
 of which are least-preferred, normal tie-breaking applies. Note that this
 would only be expected to happen if the only routes available for selection
 were least-preferred -- in all other cases, such routes would have been
@@ -988,8 +989,8 @@ However, the same is not always true of IBGP.
 	<t>
 Consistent route selection is a fundamental tenet of IBGP correctness and
 safe operation in hop-by-hop routed networks. When routers within an AS apply different criteria in
-selecting routes, they can arrive at inconsistent route selections, 
-potentially with the consequence of forming forwarding loops unless some
+selecting routes, they can arrive at inconsistent route selections. 
+This can lead to the formation of forwarding loops unless some
 form of tunneled forwarding is used to prevent "core" routers from 
 making a (potentially inconsistent) forwarding decision based on the
 IP header. 
@@ -1222,8 +1223,8 @@ advertised the LLGR Capability to ASBR1:
     <section anchor="Acknowledgements" title="Acknowledgements">
       <t>
 We would like to thank Nabil Bitar, Martin Djernaes, Roberto Fragassi,
-Jeffrey Haas, Nicolai Leymann, Paul Mattes, John Medamana, Pranav
-Mehta, Han Nguyen, and Saikat Ray for their valuable input
+Jeffrey Haas, Nicolai Leymann, Mike McBride, Paul Mattes, John Medamana, Pranav
+Mehta, Han Nguyen, Saikat Ray, and Bo Wu for their valuable input
 and contributions to the discussion and solution.
       </t>
     </section>
@@ -1232,7 +1233,7 @@ and contributions to the discussion and solution.
         <figure align="left"><artwork align="left"><![CDATA[
  Clarence Filsfils
  Cisco Systems
- Brussels  1000
+ Brussels  1150
  Belgium
 
  Email: cf@cisco.com
@@ -1327,6 +1328,7 @@ populated as follows:
 <!--      &RFC6513;
       &RFC6514;
       &RFC6625; -->
+      &RFC6368;
       &RFC8174;
 	  &RFC8538;
     </references>
@@ -1336,7 +1338,6 @@ populated as follows:
       &RFC4781;
       &RFC4364;
       &RFC5880;
-      &RFC6368;
 <!--      &RFC7524; -->
       &RFC8955;
     </references>
