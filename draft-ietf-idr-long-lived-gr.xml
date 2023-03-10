@@ -52,7 +52,7 @@
 <?rfc subcompact="no" ?>
 <!-- keep one blank line between list items -->
 <!-- end of list of popular I-D processing instructions -->
-<rfc category="std" docName="draft-ietf-idr-long-lived-gr-03" ipr="trust200902"
+<rfc category="std" docName="draft-ietf-idr-long-lived-gr-04" ipr="trust200902"
  updates="6368">
   <!-- category values: std, bcp, info, exp, and historic
      ipr values: full3667, noModification3667, noDerivatives3667
@@ -385,7 +385,7 @@ Long-lived Stale Time:
 </t>
 <t><list style="empty"><t>
       This time (in seconds) specifies how long stale information
-      (for the AFI/SAFI) may be retained (in conjunction
+      (for this AFI/SAFI) may be retained by the receiver (in addition
       with the period specified by the "Restart Time" in the
       Graceful Restart Capability). Because the potential use cases for
       this extension vary widely, there is no suggested default
@@ -515,7 +515,7 @@ procedures MUST be performed:
       	</t>
       	<t><list style="symbols">
       	<t>
-     For each AFI/SAFI for which it has advertised a nonzero "Long-lived
+     For each AFI/SAFI for which it has received a nonzero "Long-lived
      Stale Time", the helper router MUST start a timer for that
      "Long-lived Stale Time". If the timer for the "Long-lived Stale
      Time" for a given AFI/SAFI expires before the session is
@@ -1223,7 +1223,7 @@ advertised the LLGR Capability to ASBR1:
     <section anchor="Acknowledgements" title="Acknowledgements">
       <t>
 We would like to thank Nabil Bitar, Martin Djernaes, Roberto Fragassi,
-Jeffrey Haas, Nicolai Leymann, Mike McBride, Paul Mattes, John Medamana, Pranav
+Jeffrey Haas, Jakob Heitz, Nicolai Leymann, Mike McBride, Paul Mattes, John Medamana, Pranav
 Mehta, Han Nguyen, Saikat Ray, and Bo Wu for their valuable input
 and contributions to the discussion and solution.
       </t>
