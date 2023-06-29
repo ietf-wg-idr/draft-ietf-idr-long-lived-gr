@@ -52,7 +52,7 @@
 <?rfc subcompact="no" ?>
 <!-- keep one blank line between list items -->
 <!-- end of list of popular I-D processing instructions -->
-<rfc category="std" docName="draft-ietf-idr-long-lived-gr-04" ipr="trust200902"
+<rfc category="std" docName="draft-ietf-idr-long-lived-gr-05" ipr="trust200902"
  updates="6368">
   <!-- category values: std, bcp, info, exp, and historic
      ipr values: full3667, noModification3667, noDerivatives3667
@@ -70,9 +70,9 @@
     <!-- add 'role="editor"' below for the editors if appropriate -->
 
     <author fullname="James Uttaro" initials="J." surname="Uttaro">
-      <organization>AT&amp;T</organization>
+      <organization>Independent Contributor</organization>
       <address>
-        <email>ju1738@att.com</email>
+        <email>juttaro@ieee.org</email>
       </address>
     </author>
 
@@ -421,14 +421,14 @@ reject, or modify routes based on the presence or absence of this community.
 	</section>
     </section>
     
-    <section anchor="operation" title="Operation">
+    <section anchor="operation" title="Theory of Operation">
       <t>
- A BGP speaker MAY use BGP Capabilities Advertisement <xref target="RFC5492"></xref> to
-advertise the "Long-lived Graceful Restart Capability" to indicate
-its ability to retain state and perform related procedures
-specified in this document. The setting of the parameters for an
-AFI/SAFI depends on the properties of the BGP speaker, network
-scale, and local configuration.
+If A BGP speaker is configured to support the procedures of this
+document, it MUST use <xref target="RFC5492">BGP Capabilities
+Advertisement</xref> to advertise the "Long-lived Graceful Restart
+Capability". The setting of the parameters for an AFI/SAFI depends on
+the properties of the BGP speaker, network scale, and local
+configuration.
       </t>
       <t>
 In the presence of the "Long-lived Graceful Restart Capability", the
@@ -968,15 +968,24 @@ violating the intent of the set LLGR bit.
       
       <section anchor="deploy_pe_ce" title="When BGP is the PE-CE Protocol in a VPN">
         <t>
-As discussed in <xref target="pe_ce"/>, it may be necessary for a PE
-(or CE, in the symmetric case) to advertise stale routes to a CE (or
-PE) in some VPN deployments, even if the CE (PE) does not support
-this specification. In that case, the operator configuring their PE
-(CE) to advertise such routes should notify the operator of the CE
-(PE) receiving the routes, and the CE (PE) should be configured to
-depreference the routes. Typical BGP implementations will be able to
-do this by matching on the LLGR_STALE community and setting the
-LOCAL_PREF for matching routes to zero, similar to the procedure
+As discussed in <xref target="pe_ce"/>, it may be necessary for a PE to
+advertise stale routes to a CE in some VPN deployments, even if the CE
+does not support this specification. In that case, the operator
+configuring their PE to advertise such routes should notify the operator
+of the CE receiving the routes, and the CE should be configured to
+depreference the routes.
+        </t>
+        <t>
+Similarly, it may be necessary for a CE to advertise stale routes to a
+PE, even if the PE does not support this specification. In that case,
+the operator configuring their CE to advertise such routes should notify
+the operator of the PE receiving the routes, and the PE should be
+configured to depreference the routes.
+		</t>
+		<t>
+Typical BGP implementations will be able to be configured to
+depreference routes by matching on the LLGR_STALE community and setting
+the LOCAL_PREF for matching routes to zero, similar to the procedure
 described in <xref target="partial_deploy"/>.
         </t>
       </section>
@@ -1223,7 +1232,7 @@ advertised the LLGR Capability to ASBR1:
     <section anchor="Acknowledgements" title="Acknowledgements">
       <t>
 We would like to thank Nabil Bitar, Martin Djernaes, Roberto Fragassi,
-Jeffrey Haas, Jakob Heitz, Nicolai Leymann, Mike McBride, Paul Mattes, John Medamana, Pranav
+Jeffrey Haas, Jakob Heitz, Daniam Henriques, Nicolai Leymann, Mike McBride, Paul Mattes, John Medamana, Pranav
 Mehta, Han Nguyen, Saikat Ray, and Bo Wu for their valuable input
 and contributions to the discussion and solution.
       </t>
