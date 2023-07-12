@@ -52,7 +52,7 @@
 <?rfc subcompact="no" ?>
 <!-- keep one blank line between list items -->
 <!-- end of list of popular I-D processing instructions -->
-<rfc category="std" docName="draft-ietf-idr-long-lived-gr-05" ipr="trust200902"
+<rfc category="std" docName="draft-ietf-idr-long-lived-gr-06" ipr="trust200902"
  updates="6368">
   <!-- category values: std, bcp, info, exp, and historic
      ipr values: full3667, noModification3667, noDerivatives3667
@@ -99,13 +99,6 @@
     
     <date/>
 
-    <!-- If the month and year are both specified and are the current ones, xml2rfc will fill 
-         in the current day for you. If only the current year is specified, xml2rfc will fill 
-	 in the current day and month for you. If the year is not the current one, it is 
-	 necessary to specify at least a month (xml2rfc assumes day="1" if not specified for the 
-	 purpose of calculating the expiry date).  With drafts it is normally sufficient to 
-	 specify just the year. -->
-
     <!-- Meta-data Declarations -->
 
     <area>General</area>
@@ -140,7 +133,7 @@ advisable in all cases, and we provide guidelines to help determine if it
 is.
       </t>
       <t>
-We update RFC 6368 by specifying that the LLGR_STALE community must be 
+This memo updates RFC 6368 by specifying that the LLGR_STALE community must be 
 propagated into, or out of, the path attributes exchanged between PE and
 CE.
 	  </t>
@@ -400,7 +393,7 @@ The well-known BGP community <xref target="RFC1997"></xref>
 "LLGR_STALE" (value: 0xFFFF0006) can be used to mark stale routes
 retained for a longer period of time. Such long-lived stale routes are to
 be handled according to the procedures specified in the <xref
-target="operation">Operation section</xref>.
+target="operation">Theory of Operation section</xref>.
 </t>	
 <t>
 An implementation MAY allow users to configure policies that accept,
@@ -491,7 +484,9 @@ the stale routes for an AFI/SAFI MUST be retained. The interval for
 which they are retained is
 limited by the sum of the "Restart Time" in the received Graceful Restart Capability
 and the "Long-lived Stale Time" in the received Long-lived Graceful
-Restart Capability. These timers MAY be modified by local configuration.
+Restart Capability. The timers received in the Long-lived Graceful Restart 
+Capability SHOULD be modifiable by local configuration, which may impose either 
+an upper or a lower bound, or both, on their respective values.
       	</t>
       	<t>
 If the value of the "Restart Time" or the "Long-lived Stale Time" is zero,
@@ -1060,7 +1055,10 @@ of enabling LLGR.
       <t>
 The security implications of the LLGR mechanism defined 
 in this document are akin to those incurred by the maintenance of
-stale routing information within a network.  This is particularly
+stale routing information within a network.  However, since the
+retention time may potentially be much longer, the window during
+which certain attacks are feasible may be substantially increased.   
+This is particularly
 relevant when considering the maintenance of routing information that
 is used for service segregation - such as MPLS label entries.
       </t>
@@ -1068,7 +1066,7 @@ is used for service segregation - such as MPLS label entries.
 For MPLS VPN services, the effectiveness of the traffic isolation
 between VPNs relies on the correctness of the MPLS labels between
 ingress and egress PEs.  In particular, when an egress PE withdraws a
-label L1 allocated to a VPN1 route, this label MUST NOT be assigned
+label L1 allocated to a VPN1 route, this label must not be assigned
 to a VPN route of a different VPN until all ingress PEs stop using
 the old VPN1 route using L1.
       </t>
@@ -1090,10 +1088,18 @@ in this document as VPN routes can be stalled for a much longer
 period of time (for example 2 hours, 1 day).
       </t>
       <t>
-Therefore, to avoid VPN breach, before enabling BGP LLGR for a VPN
-address family, Service Providers
-need to check how fast a given label can be reused by a PE, taking
-into account:
+In order to exploit the vulnerability described above, there is a
+requirement to engineer a specific LLGR state between two PE devices,
+whilst engineering label reallocation to occur in a manner that
+results in the two topologies overlapping. 
+Therefore, to avoid the potential for a VPN breach, before enabling BGP
+LLGR for a VPN address family, the operator should endeavor to ensure
+that the lower bound on when a label might be reused is greater than the
+upper bound on LLST. <xref target="session_resets"/> discusses the
+provision of an upper bound on LLST. Details of features for setting
+a lower bound on label reuse time are beyond the scope of this document;
+however, factors that might need to be taken into account when setting
+this value include:
       </t>
       <t><list style="symbols">
       <t>
@@ -1111,16 +1117,6 @@ into account:
       <t>
 Note that <xref target="RFC4781"></xref> which defines Graceful Restart Mechanism
 for BGP with MPLS is also applicable to BGP LLGR.
-      </t>
-      <t>
-These considerations notwithstanding, the LLGR mechanism
-described within this document is considered to be complex to exploit
-maliciously - in order to inject packets into a topology, there is a
-requirement to engineer a specific LLGR state between two PE
-devices, whilst engineering label reallocation to occur in a manner
-that results in the two topologies overlapping.  Such allocation is
-particularly difficult to engineer (since it is typically an internal
-mechanism of a router).
       </t>
     </section>
     
@@ -1233,7 +1229,7 @@ advertised the LLGR Capability to ASBR1:
       <t>
 We would like to thank Nabil Bitar, Martin Djernaes, Roberto Fragassi,
 Jeffrey Haas, Jakob Heitz, Daniam Henriques, Nicolai Leymann, Mike McBride, Paul Mattes, John Medamana, Pranav
-Mehta, Han Nguyen, Saikat Ray, and Bo Wu for their valuable input
+Mehta, Han Nguyen, Saikat Ray, Valery Smyslov, and Bo Wu for their valuable input
 and contributions to the discussion and solution.
       </t>
     </section>
